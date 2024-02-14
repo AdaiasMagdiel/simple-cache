@@ -1,5 +1,9 @@
 # Simple Cache
 
+[![PyPI version](https://badge.fury.io/py/mgdl-simple-cache.svg)](https://badge.fury.io/py/mgdl-simple-cache)
+![License](https://img.shields.io/badge/license-MIT-blue)
+
+
 Simple Cache is a lightweight cache manager designed to simplify caching operations using Deta Base. It offers a convenient way to store and retrieve cached data efficiently in Python applications.
 
 ## Installation
