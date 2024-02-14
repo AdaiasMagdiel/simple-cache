@@ -2,7 +2,7 @@ from datetime import datetime
 from deta import Deta, _Base
 from typing import Any, Optional
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 
 class CacheData:
@@ -19,12 +19,32 @@ class SimpleCache:
     deta: Deta
     cache_db: _Base
 
-    def __init__(self, deta_key: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        deta_key: Optional[str] = None,
+        table_name: Optional[str] = None
+    ) -> None:
+        if table_name == "":
+            raise ValueError(
+                "The table name should be a valid name, not a empty string"
+            )
+
+        if table_name:
+            self.cache_table = table_name
+
         if deta_key is not None:
             self.deta_key = deta_key
             self.__configure_db()
 
-    def init(self, deta_key: str) -> None:
+    def init(self, deta_key: str, table_name: Optional[str] = None) -> None:
+        if table_name == "":
+            raise ValueError(
+                "The table name should be a valid name, not a empty string"
+            )
+
+        if table_name:
+            self.cache_table = table_name
+
         self.deta_key = deta_key
 
         self.__configure_db()
