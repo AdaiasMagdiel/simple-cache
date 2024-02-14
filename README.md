@@ -20,13 +20,15 @@ In today's data-driven applications, caching plays a crucial role in enhancing p
 
 ## Usage
 
-To use `simple-cache`, you need to initialize an instance of the `SimpleCache` class. You can optionally provide a Deta Base key during initialization. If not provided during initialization, you can call the `init()` method later to set the Deta Base key.
+To use `simple-cache`, you need to initialize an instance of the `SimpleCache` class. You can optionally provide a Deta Base key during initialization. If not provided during initialization, you can call the `init()` method later to set the Deta Base key. You can change the table name passing a string as second argument to `constructor` or `init` method, the default is `sc_cache`.
 
 ```python
 from simple_cache import SimpleCache
 
 # Initialize SimpleCache
 cache = SimpleCache("YOUR_DETA_PROJECT_KEY")
+# Or
+cache_with_table_name = SimpleCache(deta_key="YOUR_DETA_PROJECT_KEY", table_name="a_new_table_name")
 ```
 
 Or
@@ -37,6 +39,11 @@ from simple_cache import SimpleCache
 # Initialize SimpleCache
 cache = SimpleCache()
 cache.init("YOUR_DETA_PROJECT_KEY")
+
+# Or
+
+cache_with_table_name = SimpleCache()
+cache_with_table_name.init(deta_key="YOUR_DETA_PROJECT_KEY", table_name="a_new_table_name")
 ```
 
 ### Methods
@@ -88,8 +95,8 @@ A class for managing cached data using Deta Base.
 
 #### Methods
 
-- `__init__(deta_key: Optional[str] = None)`: Initialize the SimpleCache instance.
-- `init(deta_key: str)`: Initialize the SimpleCache instance with the Deta Base key.
+- `__init__(deta_key: Optional[str] = None, table_name: Optional[str] = None)`: Initialize the SimpleCache instance.
+- `init(deta_key: str, table_name: Optional[str] = None)`: Initialize the SimpleCache instance with the Deta Base key.
 - `get(key: str) -> CacheData`: Retrieve cached data.
 - `set(key: str, value: Any) -> CacheData`: Store data in the cache.
 - `set_validate(key: str, valid: bool, silent: bool = True) -> None`: Update the validity status of cached data.
