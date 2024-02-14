@@ -2,13 +2,16 @@ from datetime import datetime
 from deta import Deta, _Base
 from typing import Any, Optional
 
-__version__ = "0.0.1-rc1"
+__version__ = "0.0.1"
 
 
 class CacheData:
     def __init__(self, value: Any, valid: bool) -> None:
         self.value = value
         self.valid = valid
+
+    def __repr__(self) -> str:
+        return f'<CacheData value="..." valid="{self.valid}">'
 
 
 class SimpleCache:
