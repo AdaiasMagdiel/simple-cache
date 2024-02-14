@@ -14,6 +14,33 @@ def test_initialize_class_and_post_initialize():
     assert cache.deta is not None
 
 
+def test_initialize_class_and_post_initialize_with_valid_table_name():
+    table_name = "table"
+
+    cache = SimpleCache(deta_key=deta_key, table_name=table_name)
+    assert cache.deta is not None
+    assert cache.cache_table == table_name
+
+    cache = SimpleCache()
+    assert not hasattr(cache, "deta")
+    assert cache.cache_table == "sc_cache"
+
+    cache.init(deta_key=deta_key, table_name=table_name)
+    assert cache.deta is not None
+    assert cache.cache_table == table_name
+
+
+def test_raise_exception_with_invalid_table_name():
+    table_name = ""
+
+    with pytest.raises(ValueError):
+        SimpleCache(deta_key=deta_key, table_name=table_name)
+
+    with pytest.raises(ValueError):
+        cache = SimpleCache()
+        cache.init(deta_key=deta_key, table_name=table_name)
+
+
 def test_insert_and_get_cache():
     cache = SimpleCache(deta_key=deta_key)
 
