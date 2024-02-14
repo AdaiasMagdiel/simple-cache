@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mgdl-simple-cache"
+version = "0.0.1-rc1"
+description = "Simple Cache is a lightweight cache manager designed to simplify caching operations using Deta Base. It offers a convenient way to store and retrieve cached data efficiently in Python applications."
+readme = "README.md"
+authors = [
+    { name = "Adaías Magdiel", email = "eu@adaiasmagdiel.com" }
+]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Natural Language :: English",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Utilities",
+]
+keywords = ["cache", "caching", "deta", "deta space", "development", "utility", "tool"]
+requires-python = ">=3.6"
+dependencies = [
+  "deta"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest"
+]
