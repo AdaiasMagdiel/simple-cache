@@ -48,11 +48,12 @@ cache_with_table_name.init(deta_key="YOUR_DETA_PROJECT_KEY", table_name="a_new_t
 
 ### Methods
 
-#### `get(key: str) -> CacheData`
+#### `get(key: str, action: Callable[[], str]) -> CacheData`
 
-Retrieve cached data associated with the specified key.
+Retrieve cached data associated with the specified key. If the key not exists or the cache is invalid or the cache have no value, execute the action function, store the value and return it.
 
 - `key`: The key corresponding to the cached data.
+- `action`: The function to execute and generate content if the cache is invalid.
 - Returns a `CacheData` object containing the cached value and its validity status.
 
 #### `set(key: str, value: Any) -> CacheData`
@@ -97,7 +98,7 @@ A class for managing cached data using Deta Base.
 
 - `__init__(deta_key: Optional[str] = None, table_name: Optional[str] = None)`: Initialize the SimpleCache instance.
 - `init(deta_key: str, table_name: Optional[str] = None)`: Initialize the SimpleCache instance with the Deta Base key.
-- `get(key: str) -> CacheData`: Retrieve cached data.
+- `get(key: str, action: Callable[[], str]) -> CacheData`: Retrieve cached data.
 - `set(key: str, value: Any) -> CacheData`: Store data in the cache.
 - `set_validate(key: str, valid: bool, silent: bool = True) -> None`: Update the validity status of cached data.
 
