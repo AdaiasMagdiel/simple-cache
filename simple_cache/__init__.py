@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from deta import Deta, _Base
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 
 class CacheData:
@@ -53,13 +53,19 @@ class SimpleCache:
         self.deta = Deta(self.deta_key)
         self.cache_db = self.deta.Base(self.cache_table)
 
-    def get(self, key: str) -> CacheData:
+    def get(self, key: str, action: Callable[[], str]) -> CacheData:
         if key is None or key == "":
             raise ValueError("Key can not be None or empty")
 
         res: dict = self.cache_db.get(key=key) or {}  # type:ignore
         value = res.get("value", None)
         valid = res.get("valid", False)
+
+        if value is None or valid is False:
+            value = action()
+
+            self.set(key=key, value=value)
+            return CacheData(value=value, valid=True)
 
         return CacheData(value=value, valid=valid)
 
@@ -71,7 +77,7 @@ class SimpleCache:
             data={
                 "value": value,
                 "valid": True,
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
             },
             key=key,
         )  # type:ignore
