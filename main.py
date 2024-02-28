@@ -11,18 +11,25 @@ cache.init(deta_key=deta_key)
 
 # -*-*-*
 
-res = cache.get(key="/")
-print(res)  # <CacheData value="..." valid=False>
+
+def generate_content() -> str:
+    return "content"
+
 
 # -*-*-*
 
-res = cache.get(key="/")
-print(res.valid)  # False
+res = cache.get(key="/", action=generate_content)
+print(res)  # <CacheData value="content" valid=True>
 
 # -*-*-*
 
-res = cache.get(key="/")
-print(res.value)  # None
+res = cache.get(key="/", action=generate_content)
+print(res.valid)  # True
+
+# -*-*-*
+
+res = cache.get(key="/", action=generate_content)
+print(res.value)  # content
 
 # -*-*-*
 
@@ -34,7 +41,7 @@ print(res.valid)  # True
 # -*-*-*
 
 cache.set_validate(key="/", valid=False)
-res = cache.get(key="/")
+res = cache.get(key="/", action=generate_content)
 
-print(res.value)  # <h1>Olá, Mundo!</h1>
-print(res.valid)  # False
+print(res.value)  # content
+print(res.valid)  # True
