@@ -2,6 +2,10 @@ import pytest
 from simple_cache import SimpleCache
 from config import deta_key
 from uuid import uuid4
+from datetime import datetime, timedelta
+from time import sleep
+
+cache = SimpleCache(deta_key=deta_key)
 
 
 def generate_content() -> str:
@@ -47,7 +51,6 @@ def test_raise_exception_with_invalid_table_name():
 
 
 def test_cache_with_action_value():
-    cache = SimpleCache(deta_key=deta_key)
     key = str(uuid4())
 
     res = cache.get(key=key, action=generate_content)
@@ -57,7 +60,6 @@ def test_cache_with_action_value():
 
 
 def test_insert_and_get_cache():
-    cache = SimpleCache(deta_key=deta_key)
     key = str(uuid4())
 
     cache.set(key=key, value="value")
@@ -68,7 +70,6 @@ def test_insert_and_get_cache():
 
 
 def test_update_cache():
-    cache = SimpleCache(deta_key=deta_key)
     key = str(uuid4())
 
     cache.set(key=key, value="value")
@@ -80,7 +81,6 @@ def test_update_cache():
 
 
 def test_invalidate_cache():
-    cache = SimpleCache(deta_key=deta_key)
     key = str(uuid4())
 
     cache.set(key=key, value="value")
@@ -95,7 +95,6 @@ def test_invalidate_cache():
 
 
 def test_mixed_values():
-    cache = SimpleCache(deta_key=deta_key)
     key = str(uuid4())
 
     cache.set(key=key, value={"panic": 42})
@@ -118,7 +117,6 @@ def test_mixed_values():
 
 
 def test_large_value():
-    cache = SimpleCache(deta_key=deta_key)
     key = str(uuid4())
 
     large_value = "a" * 10000
@@ -130,8 +128,6 @@ def test_large_value():
 
 
 def test_invalid_key():
-    cache = SimpleCache(deta_key=deta_key)
-
     with pytest.raises(ValueError):
         cache.set(key="", value="value")
 
@@ -152,8 +148,6 @@ def test_invalid_key():
 
 
 def test_set_validate_to_non_existing_key():
-    cache = SimpleCache(deta_key=deta_key)
-
     with pytest.raises(ValueError):
         cache.set_validate(key="this-key-not-exists", valid=False, silent=False)
 
@@ -161,3 +155,76 @@ def test_set_validate_to_non_existing_key():
         key="this-key-not-exists", valid=False, silent=True
     )
     assert res is None
+
+
+def test_set_cache_with_expiry():
+    key = str(uuid4())
+
+    def action():
+        return str(uuid4())
+
+    res = cache.get(key=key, action=action, expire_in=timedelta(seconds=2))
+    value = res.value
+
+    # Wait for the cache to expire
+    sleep(3)
+
+    # Ensure that the cache has expired
+    res_expired = cache.get(
+        key=key, action=action, expire_in=timedelta(seconds=2)
+    )
+    assert res_expired.value != value
+
+
+def test_set_cache_with_expiry_and_regenerate_without_expiry():
+    key = str(uuid4())
+
+    def action():
+        return str(uuid4())
+
+    res = cache.get(key=key, action=action, expire_in=timedelta(seconds=2))
+    value = res.value
+
+    sleep(3)
+
+    res_expired = cache.get(key=key, action=action)
+    assert res_expired.value != value
+    value = res_expired.value
+
+    sleep(1)
+
+    res_expired = cache.get(key=key, action=action)
+    assert res_expired.value == value
+
+
+def test_invalid_expire_at_type():
+    key = str(uuid4())
+
+    with pytest.raises(TypeError):
+        cache.set(
+            key=key,
+            value="value",
+            expire_in="invalid_type"  # type:ignore
+        )
+
+    with pytest.raises(TypeError):
+        cache.set(key=key, value="value", expire_in=[1, 2, 3])  # type:ignore
+
+    with pytest.raises(TypeError):
+        cache.set(
+            key=key,
+            value="value",
+            expire_in={"key": "value"}  # type:ignore
+        )
+
+    with pytest.raises(TypeError):
+        cache.set(key=key, value="value", expire_in=(1,))  # type:ignore
+
+    with pytest.raises(TypeError):
+        cache.set(key=key, value="value", expire_in=True)  # type:ignore
+
+    with pytest.raises(TypeError):
+        cache.set(key=key, value="value", expire_in=1 + 2j)  # type:ignore
+
+    with pytest.raises(TypeError):
+        cache.set(key=key, value="value", expire_in=object())  # type:ignore
