@@ -1,8 +1,8 @@
-from datetime import datetime, UTC
+from datetime import datetime, UTC, timedelta
 from deta import Deta, _Base
 from typing import Any, Callable, Optional
 
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 
 
 class CacheData:
@@ -53,39 +53,65 @@ class SimpleCache:
         self.deta = Deta(self.deta_key)
         self.cache_db = self.deta.Base(self.cache_table)
 
-    def get(self, key: str, action: Callable[[], str]) -> CacheData:
-        if key is None or key == "":
+    def get(
+        self,
+        key: str,
+        action: Callable[[], str],
+        expire_in: Optional[timedelta] = None
+    ) -> CacheData:
+        if not key:
             raise ValueError("Key can not be None or empty")
 
-        res: dict = self.cache_db.get(key=key) or {}  # type:ignore
-        value = res.get("value", None)
-        valid = res.get("valid", False)
+        if expire_in and not isinstance(expire_in, timedelta):
+            raise TypeError(
+                "'expire_in' must be a 'timedelta' with the expire time"
+            )
 
-        if value is None or valid is False:
+        res: dict = self.cache_db.get(key=key) or {}  # type:ignore
+        value = res.get("value")
+        valid = res.get("valid", False)
+        expires = res.get("expires")
+
+        actual_timestamp = datetime.now().timestamp()
+        if (value is None or
+            valid is False) or (expires and expires <= actual_timestamp):
             value = action()
 
-            self.set(key=key, value=value)
+            self.set(key=key, value=value, expire_in=expire_in)
+
             return CacheData(value=value, valid=True)
 
         return CacheData(value=value, valid=valid)
 
-    def set(self, key: str, value: Any) -> CacheData:
-        if key is None or key == "":
+    def set(
+        self,
+        key: str,
+        value: Any,
+        expire_in: Optional[timedelta] = None
+    ) -> CacheData:
+        if not key:
             raise ValueError("Key can not be None or empty")
 
-        self.cache_db.put(
-            data={
-                "value": value,
-                "valid": True,
-                "created_at": datetime.now(UTC).isoformat(),
-            },
-            key=key,
-        )  # type:ignore
+        data = {
+            "value": value,
+            "valid": True,
+            "created_at": datetime.now(UTC).isoformat(),
+        }
+
+        if expire_in:
+            if not isinstance(expire_in, timedelta):
+                raise TypeError(
+                    "'expire_in' must be a 'timedelta' with the expire time"
+                )
+
+            data["expires"] = (datetime.now() + expire_in).timestamp()
+
+        self.cache_db.put(data=data, key=key)
 
         return CacheData(value=value, valid=True)
 
     def set_validate(self, key: str, valid: bool, silent: bool = True) -> None:
-        if key is None or key == "":
+        if not key:
             raise ValueError("Key can not be None or empty")
 
         try:
