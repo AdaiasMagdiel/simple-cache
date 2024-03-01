@@ -103,6 +103,32 @@ A class for managing cached data using Deta Base.
 -   `set(key: str, value: Any, expire_in: Optional[datetime.timedelta] = None) -> CacheData`: Store data in the cache.
 -   `set_validate(key: str, valid: bool, silent: bool = True) -> None`: Update the validity status of cached data.
 
+## Testing
+
+If you wish to contribute to this project and run the tests, you will need to install `pytest` and run.
+
+```bash
+pip install pytest
+```
+
+```bash
+pytest -vvsx # Increased verbosity, shows the stdout, breaks at the first failure
+```
+
+### Coverage
+
+If you would like to include coverage, make sure to also install `pytest-cov`.
+
+```bash
+pip install pytest-cov
+```
+
+And run `pytest` command with the coverage options:
+
+```bash
+pytest --cov=simple_cache --cov-report=html -vvsx
+```
+
 ## License
 
 This project is licensed under the terms of the MIT license. See the [LICENSE](./LICENSE) file for details.
