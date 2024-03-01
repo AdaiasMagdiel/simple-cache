@@ -197,7 +197,7 @@ def test_set_cache_with_expiry_and_regenerate_without_expiry():
     assert res_expired.value == value
 
 
-def test_invalid_expire_at_type():
+def test_invalid_expire_in_type_in_set():
     key = str(uuid4())
 
     with pytest.raises(TypeError):
@@ -228,3 +228,39 @@ def test_invalid_expire_at_type():
 
     with pytest.raises(TypeError):
         cache.set(key=key, value="value", expire_in=object())  # type:ignore
+
+
+def test_invalid_expire_in_type_in_get():
+    key = str(uuid4())
+
+    def action():
+        return ''
+
+    with pytest.raises(TypeError):
+        cache.get(
+            key=key,
+            action=action,
+            expire_in="invalid_type"  # type:ignore
+        )
+
+    with pytest.raises(TypeError):
+        cache.get(key=key, action=action, expire_in=[1, 2, 3])  # type:ignore
+
+    with pytest.raises(TypeError):
+        cache.get(
+            key=key,
+            action=action,
+            expire_in={"key": "value"}  # type:ignore
+        )
+
+    with pytest.raises(TypeError):
+        cache.get(key=key, action=action, expire_in=(1,))  # type:ignore
+
+    with pytest.raises(TypeError):
+        cache.get(key=key, action=action, expire_in=True)  # type:ignore
+
+    with pytest.raises(TypeError):
+        cache.get(key=key, action=action, expire_in=1 + 2j)  # type:ignore
+
+    with pytest.raises(TypeError):
+        cache.get(key=key, action=action, expire_in=object())  # type:ignore
