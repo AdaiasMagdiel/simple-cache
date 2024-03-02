@@ -19,89 +19,80 @@ In today's data-driven applications, caching plays a crucial role in enhancing p
 
 ## Usage
 
-To use `simple-cache`, you need to initialize an instance of the `SimpleCache` class. You can optionally provide a Deta Base key during initialization. If not provided during initialization, you can call the `init()` method later to set the Deta Base key. You can change the table name passing a string as second argument to `constructor` or `init` method, the default is `sc_cache`.
+To use the Simple Cache library, follow these steps:
+
+1. **Choose a Provider**: Simple Cache provides different providers for storing cache data. See all available providers [here](#providers). Alternatively, you can implement your own provider by subclassing the `Provider` abstract class.
+
+2. **Initialize the Provider**: Initialize the chosen provider with the necessary parameters. For example, if you are using the `DetaProvider`, you need to provide the Deta project key and optionally the table name:
+
+```python
+from simple_cache.providers import DetaProvider
+
+provider = DetaProvider(deta_key="your_deta_project_key", table_name="cache_table")
+```
+
+Check the [providers section](#providers) to see the signature of all parameters that are available for each provider.
+
+3. **Create a SimpleCache Instance**: Create an instance of `SimpleCache` by passing the initialized provider:
 
 ```python
 from simple_cache import SimpleCache
 
-# Initialize SimpleCache
-cache = SimpleCache("YOUR_DETA_PROJECT_KEY")
-# Or
-cache_with_table_name = SimpleCache(deta_key="YOUR_DETA_PROJECT_KEY", table_name="a_new_table_name")
+cache = SimpleCache(provider)
 ```
 
-Or
+5. **Usage**:
 
-```python
-from simple_cache import SimpleCache
+    - **Get Data**: To retrieve data from the cache, use the `get` method. If the data is not found in the cache or has expired, you can provide a callback function to generate the data and set it in the cache:
 
-# Initialize SimpleCache
-cache = SimpleCache()
-cache.init("YOUR_DETA_PROJECT_KEY")
+    ```python
+    data = cache.get(key="some_key", action=some_function, expire_in=timedelta(minutes=5))
+    ```
 
-# Or
+    - **Set Data**: To set data in the cache, use the `set` method. You can specify an optional expiration time for the data:
 
-cache_with_table_name = SimpleCache()
-cache_with_table_name.init(deta_key="YOUR_DETA_PROJECT_KEY", table_name="a_new_table_name")
-```
+    ```python
+    cache.set(key="some_key", value=some_value, expire_in=timedelta(hours=1))
+    ```
 
-### Methods
+    - **Set Data Validation**: You can mark data as valid or invalid in the cache using the `set_validate` method:
 
-#### `get(key: str, action: Callable[[], str], expire_in: Optional[datetime.timedelta] = None) -> CacheData`
-
-Retrieve cached data associated with the specified key. If the key not exists or the cache is invalid or the cache have no value, execute the action function, store the value and return it. You can give a lifetime to the cache with the `expire_in` argument.
-
--   `key`: The key corresponding to the cached data.
--   `action`: The function to execute and generate content if the cache is invalid.
--   `expire_in`: A lifetime to invalidate the cache.
--   Returns a `CacheData` object containing the cached value and its validity status.
-
-#### `set(key: str, value: Any, expire_in: Optional[datetime.timedelta] = None) -> CacheData`
-
-Store data in the cache under the given key. You can give a lifetime to the cache with the `expire_in` argument.
-
--   `key`: The key to associate with the cached data.
--   `value`: The data to be cached.
--   `expire_in`: A lifetime to invalidate the cache.
--   Returns a `CacheData` object representing the stored value and its validity status.
-
-#### `set_validate(key: str, valid: bool, silent: bool = True) -> None`
-
-Update the validity status of cached data.
-
--   `key`: The key associated with the cached data.
--   `valid`: A boolean value indicating whether the cached data is valid.
--   `silent`: If True, suppress errors during the update process.
--   Does not return any value.
+    ```python
+    cache.set_validate(key="some_key", valid=True)
+    ```
 
 ## Documentation
 
-### `CacheData`
+### SimpleCache
 
-A simple class representing cached data.
+The `SimpleCache` class provides a simplified interface for interacting with cache providers. It acts as a wrapper around a specific cache provider instance. It includes methods to initialize the cache provider, retrieve data from the cache, set data in the cache, and mark data as valid or invalid.
 
-#### Attributes
+-   `__init__(self, provider: Provider) -> None`: Initialize the SimpleCache instance with the specified cache provider.
+-   `init(self, **kwargs)`: Initialize the cache provider with the given parameters.
+-   `get(self, key: str, action: Callable[[], str], expire_in: Optional[timedelta] = None) -> CacheData`: Retrieve data from the cache with the specified key. If the data is not found or has expired, the provided action function is executed to generate the data.
+-   `set(self, key: str, value: Any, expire_in: Optional[timedelta] = None) -> CacheData`: Set data in the cache with the specified key and value. Optionally, you can specify an expiration time for the data.
+-   `set_validate(self, key: str, valid: bool, silent: bool = True) -> None`: Mark data in the cache as valid or invalid.
 
--   `value`: The cached value.
--   `valid`: A boolean indicating whether the cached value is valid.
+### Providers
 
-### `SimpleCache`
+#### Provider (ABC)
 
-A class for managing cached data using Deta Base.
+The `Provider` class is an abstract base class defining the interface for cache providers. It includes the following abstract methods:
 
-#### Attributes
+-   `init(self, **kwargs)`: Initialize the provider with the given parameters. This method should be implemented by subclasses.
+-   `get(self, key: str, action: Callable[[], str], expire_in: Optional[timedelta] = None) -> CacheData`: Retrieve data from the cache with the specified key. If the data is not found or has expired, the provided action function is executed to generate the data.
+-   `set(self, key: str, value: Any, expire_in: Optional[timedelta] = None) -> CacheData`: Set data in the cache with the specified key and value. Optionally, you can specify an expiration time for the data.
+-   `set_validate(self, key: str, valid: bool, silent: bool = True) -> None`: Mark data in the cache as valid or invalid.
 
--   `cache_table`: The name of the table where cached data is stored, default `sc_cache`.
--   `deta`: An instance of the Deta class.
--   `cache_db`: An instance of the Deta Base class.
+#### DetaProvider
 
-#### Methods
+The `DetaProvider` class is a concrete implementation of the `Provider` interface that stores cache data in Deta databases. It includes methods to initialize the provider, retrieve data from the cache, set data in the cache, and mark data as valid or invalid.
 
--   `__init__(deta_key: Optional[str] = None, table_name: Optional[str] = None)`: Initialize the SimpleCache instance.
--   `init(deta_key: str, table_name: Optional[str] = None)`: Initialize the SimpleCache instance with the Deta Base key.
--   `get(key: str, action: Callable[[], str], expire_in: Optional[datetime.timedelta] = None) -> CacheData`: Retrieve cached data.
--   `set(key: str, value: Any, expire_in: Optional[datetime.timedelta] = None) -> CacheData`: Store data in the cache.
--   `set_validate(key: str, valid: bool, silent: bool = True) -> None`: Update the validity status of cached data.
+-   `__init__(self, deta_key: Optional[str] = None, table_name: Optional[str] = None)`: Initialize the Deta provider with the specified Deta project key and table name.
+-   `init(self, **kwargs) -> None`: Initialize the Deta provider with the given parameters. If no table name is provided, a default table name is used.
+-   `get(self, key: str, action: Callable[[], str], expire_in: Optional[timedelta] = None) -> CacheData`: Retrieve data from the Deta cache with the specified key. If the data is not found or has expired, the provided action function is executed to generate the data.
+-   `set(self, key: str, value: Any, expire_in: Optional[timedelta] = None) -> CacheData`: Set data in the Deta cache with the specified key and value. Optionally, you can specify an expiration time for the data.
+-   `set_validate(self, key: str, valid: bool, silent: bool = True) -> None`: Mark data in the Deta cache as valid or invalid.
 
 ## Testing
 
