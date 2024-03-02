@@ -20,6 +20,11 @@ class DetaProvider(Provider):
                 "The table name should be a valid name, not a empty string"
             )
 
+        if deta_key == "":
+            raise ValueError(
+                "The deta key should be a valid key, not a empty string"
+            )
+
         if table_name:
             self.cache_table = table_name
 
@@ -27,15 +32,21 @@ class DetaProvider(Provider):
             self.deta_key = deta_key
             self.__configure_db()
 
-    def init(self, deta_key: str, table_name: Optional[str] = None) -> None:
+    def init(self, **kwargs) -> None:
+        table_name = kwargs.get('table_name', self.cache_table)
+        deta_key = kwargs.get('deta_key')
+
+        if not deta_key:  # deta_key is None or empty string
+            raise ValueError(
+                "The deta key should be a valid key, not a empty string or None value"
+            )
+
         if table_name == "":
             raise ValueError(
                 "The table name should be a valid name, not a empty string"
             )
 
-        if table_name:
-            self.cache_table = table_name
-
+        self.cache_table = table_name
         self.deta_key = deta_key
 
         self.__configure_db()
