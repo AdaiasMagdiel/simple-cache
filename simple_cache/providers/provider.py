@@ -6,7 +6,7 @@ from simple_cache.cache_data import CacheData
 
 class Provider(ABC):
     @abstractmethod
-    def init(self):
+    def init(self, **kwargs):
         pass
 
     @abstractmethod
