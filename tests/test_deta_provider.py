@@ -5,7 +5,10 @@ from uuid import uuid4
 from datetime import datetime, timedelta
 from time import sleep
 
-cache = SimpleCache(deta_key=deta_key)
+from simple_cache.providers.deta import DetaProvider
+
+provider = DetaProvider(deta_key=deta_key)
+cache = SimpleCache(provider=provider)
 
 
 def generate_content() -> str:
@@ -13,10 +16,12 @@ def generate_content() -> str:
 
 
 def test_initialize_class_and_post_initialize():
-    cache = SimpleCache(deta_key=deta_key)
+    provider = DetaProvider(deta_key=deta_key)
+    cache = SimpleCache(provider=provider)
     assert cache.deta is not None
 
-    cache = SimpleCache()
+    provider = DetaProvider()
+    cache = SimpleCache(provider=provider)
     assert not hasattr(cache, "deta")
 
     cache.init(deta_key=deta_key)
@@ -26,11 +31,13 @@ def test_initialize_class_and_post_initialize():
 def test_initialize_class_and_post_initialize_with_valid_table_name():
     table_name = "table"
 
-    cache = SimpleCache(deta_key=deta_key, table_name=table_name)
+    provider = DetaProvider(deta_key=deta_key, table_name=table_name)
+    cache = SimpleCache(provider=provider)
     assert cache.deta is not None
     assert cache.cache_table == table_name
 
-    cache = SimpleCache()
+    provider = DetaProvider()
+    cache = SimpleCache(provider=provider)
     assert not hasattr(cache, "deta")
     assert cache.cache_table == "sc_cache"
 
@@ -43,11 +50,29 @@ def test_raise_exception_with_invalid_table_name():
     table_name = ""
 
     with pytest.raises(ValueError):
-        SimpleCache(deta_key=deta_key, table_name=table_name)
+        provider = DetaProvider(deta_key=deta_key, table_name=table_name)
+        cache = SimpleCache(provider=provider)
 
     with pytest.raises(ValueError):
-        cache = SimpleCache()
+        provider = DetaProvider()
+        cache = SimpleCache(provider=provider)
         cache.init(deta_key=deta_key, table_name=table_name)
+
+
+def test_raise_exception_with_invalid_deta_key():
+    with pytest.raises(ValueError):
+        provider = DetaProvider(deta_key="")
+        cache = SimpleCache(provider=provider)
+
+    with pytest.raises(ValueError):
+        provider = DetaProvider()
+        cache = SimpleCache(provider=provider)
+        cache.init(deta_key=None)
+
+    with pytest.raises(ValueError):
+        provider = DetaProvider()
+        cache = SimpleCache(provider=provider)
+        cache.init(deta_key="")
 
 
 def test_cache_with_action_value():
