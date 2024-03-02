@@ -1,0 +1,4 @@
+[run]
+omit =
+    simple_cache/cache_data.py
+    simple_cache/providers/provider.py
