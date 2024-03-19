@@ -14,9 +14,9 @@ def test_decoraton_can_set_cache():
     def function():
         return f"Value: {inc}"
 
-    res1 = function().value
+    res1 = function()
     inc += 1
-    res2 = function().value
+    res2 = function()
 
     assert res1 == "Value: 1"
     assert res2 == "Value: 1"
@@ -29,13 +29,13 @@ def test_decoraton_can_set_cache_with_expiration():
     def function():
         return f"Value: {inc}"
 
-    res1 = function().value
+    res1 = function()
 
     inc += 1
     time.sleep(5)
 
-    res2 = function().value
-    res3 = function().value
+    res2 = function()
+    res3 = function()
 
     assert res1 == "Value: 2"
     assert res2 == "Value: 3"
