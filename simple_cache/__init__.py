@@ -5,7 +5,7 @@ from typing import Any, Callable, Optional
 from simple_cache.cache_data import CacheData
 from .providers.provider import Provider
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 
 class SimpleCache(Provider):
@@ -112,7 +112,7 @@ class SimpleCache(Provider):
 
                 return self.provider.get(
                     key=key, action=function, expire_in=expire_in
-                )
+                ).value
 
             return inner
 
