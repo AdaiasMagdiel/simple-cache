@@ -137,11 +137,24 @@ The `DetaProvider` class is a concrete implementation of the `Provider` interfac
 
 ## Testing
 
-If you wish to contribute to this project and run the tests, you will need to install `pytest` and run.
+If you wish to contribute to this project, simply install the development dependencies:
 
 ```bash
-pip install pytest
+pip install -r requirements.dev.txt
 ```
+
+And you need to rename the `config.py.example` to `config.py` and fill the `deta_key` var with a valid Deta Key:
+
+> The `config.py` file is already in `.gitignore` so don't worry about exposing your key.
+
+```python
+# config.py
+deta_key = "a0abcyxz_aSecretValue" # Change to a valid Deta Key
+```
+
+> I know I can use a `.env` for this, but I'm trying to make it as simple as possible to run the tests without an external dependency.
+
+Finally, you can run this command to execute the tests:
 
 ```bash
 pytest -vvsx # Increased verbosity, shows the stdout, breaks at the first failure
@@ -149,13 +162,7 @@ pytest -vvsx # Increased verbosity, shows the stdout, breaks at the first failur
 
 ### Coverage
 
-If you would like to include coverage, make sure to also install `pytest-cov`.
-
-```bash
-pip install pytest-cov
-```
-
-And run `pytest` command with the coverage options:
+If you would like to include coverage, just run `pytest` command with the coverage options:
 
 ```bash
 pytest --cov=simple_cache --cov-report=html -vvsx
