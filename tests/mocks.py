@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from typing import Any, Callable, Optional
-from deta import Deta, _Base
 from simple_cache.cache_data import CacheData
 from simple_cache.providers.provider import Provider
 
@@ -8,19 +7,6 @@ database = {}
 
 
 class MockProvider(Provider):
-    """
-    A class that provides caching functionality using Deta as the backend.
-
-    Attributes:
-        cache_table (str): The name of the cache table in Deta.
-        deta (Deta): The Deta client instance.
-        cache_db (_Base): The Deta Base instance for the cache table.
-    """
-
-    cache_table = "sc_cache"
-    deta: Deta
-    cache_db: _Base
-
     def __init__(self,) -> None:
         pass
 
