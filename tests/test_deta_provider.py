@@ -2,7 +2,7 @@ import pytest
 from simple_cache import SimpleCache
 from config import deta_key
 from uuid import uuid4
-from datetime import datetime, timedelta
+from datetime import timedelta
 from time import sleep
 
 from simple_cache.providers.deta import DetaProvider
