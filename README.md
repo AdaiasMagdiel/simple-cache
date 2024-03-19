@@ -73,6 +73,47 @@ The `SimpleCache` class provides a simplified interface for interacting with cac
 -   `set(self, key: str, value: Any, expire_in: Optional[timedelta] = None) -> CacheData`: Set data in the cache with the specified key and value. Optionally, you can specify an expiration time for the data.
 -   `set_validate(self, key: str, valid: bool, silent: bool = True) -> None`: Mark data in the cache as valid or invalid.
 
+### Decorator `attach`
+
+The `attach` decorator is a powerful feature of Simple Cache that allows you to store the result of a function in the cache, reducing the need to repeatedly execute the function. This is especially useful for operations that are time or resource-intensive, such as API calls or database queries.
+
+#### How to Use
+
+To use the `attach` decorator, you need to apply it to a function that you want to cache. Here's an example of how to do this:
+
+```python
+from datetime import timedelta
+from simple_cache import SimpleCache
+from simple_cache.providers import DetaProvider
+
+# Initialize the cache provider
+provider = DetaProvider(deta_key="your_deta_project_key", table_name="cache_table")
+cache = SimpleCache(provider)
+
+# Define a function that you want to cache
+@cache.attach(key="my_function_result", expire_in=timedelta(minutes=5))
+def my_function():
+    # Simulate an operation that is time or resource-intensive
+    result = "Result of the function"
+    return result
+
+# The first call to the function will store the result in the cache
+print(my_function())
+
+# Subsequent calls within the expiration time will use the cached result
+print(my_function())
+```
+
+In this example, the function `my_function` is decorated with `@cache.attach`, which means that its result will be stored in the cache with the key `"my_function_result"` and will expire after 5 minutes. On the first call to the function, the result is calculated and stored in the cache. On subsequent calls within the expiration time, the cached result is returned, avoiding the need to recalculate the result.
+
+#### Documentation
+
+-   `attach(self, key: str, expire_in: Optional[timedelta] = None)`: Decorator to store the result of a function in the cache.
+    -   `key (str)`: The unique key for the cache.
+    -   `expire_in (Optional[timedelta])`: The expiration time for the cache.
+
+This decorator is an efficient way to improve the performance of your Python applications, reducing the need for repetitive and resource-intensive operations.
+
 ### Providers
 
 #### Provider (ABC)
