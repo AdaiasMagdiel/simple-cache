@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mgdl-simple-cache"
 dynamic = ["version"]
-description = "Simple Cache is a lightweight cache manager designed to simplify caching operations using Deta Base. It offers a convenient way to store and retrieve cached data efficiently in Python applications."
+description = "Simple Cache is a lightweight cache manager designed to simplify caching operations using providers. It offers a convenient way to store and retrieve cached data efficiently in Python applications."
 readme = "README.md"
 authors = [
     { name = "Adaías Magdiel", email = "eu@adaiasmagdiel.com" }
