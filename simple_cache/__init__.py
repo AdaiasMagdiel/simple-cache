@@ -5,7 +5,7 @@ from typing import Any, Callable, Optional
 from simple_cache.cache_data import CacheData
 from .providers.provider import Provider
 
-__version__ = "1.1.1"
+__version__ = "1.1.2"
 
 
 class SimpleCache(Provider):
