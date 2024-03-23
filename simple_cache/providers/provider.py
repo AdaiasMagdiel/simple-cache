@@ -11,7 +11,7 @@ class Provider(ABC):
     This class defines the interface for cache providers.
     """
     @abstractmethod
-    def init(self, **kwargs):
+    def init(self, **kwargs) -> None:
         """
         Initialize the provider with the given keyword arguments.
 
