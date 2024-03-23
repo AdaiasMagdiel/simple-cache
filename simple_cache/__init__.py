@@ -5,7 +5,7 @@ from typing import Any, Callable, Optional
 from simple_cache.cache_data import CacheData
 from .providers.provider import Provider
 
-__version__ = "1.1.2"
+__version__ = "1.2.0"
 
 
 class SimpleCache(Provider):
@@ -15,7 +15,7 @@ class SimpleCache(Provider):
     Attributes:
         provider (Provider): The provider that handles the actual caching logic.
     """
-    def __init__(self, provider: Optional[Provider] = None) -> None:
+    def __init__(self, provider: Provider) -> None:
         """
         Initialize the SimpleCache with a given provider.
 
@@ -23,8 +23,7 @@ class SimpleCache(Provider):
             provider (Provider): The provider that handles the actual caching logic.
         """
 
-        if provider is not None:
-            self.provider = provider
+        self.provider = provider
 
     def init(self, **kwargs):
         """
