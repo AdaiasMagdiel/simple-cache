@@ -31,7 +31,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest"
+    "pytest",
+    "pytest-cov"
 ]
 
 [tool.setuptools.dynamic]
