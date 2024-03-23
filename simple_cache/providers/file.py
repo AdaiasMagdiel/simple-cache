@@ -46,21 +46,24 @@ class FileProvider(Provider):
             cache_dir = Path(cache_dir)
 
         if cache_dir.is_file():
-            raise FileExistsError(
+            raise NotADirectoryError(
                 "The provided cache_dir path already exists as a file."
             )
 
-        if not cache_dir.exists():
-            cache_dir.mkdir()
-
         self.cache_dir = cache_dir
         self.metadata = self.cache_dir.joinpath('.metadata.pickle')
+
+        if not self.cache_dir.exists():
+            cache_dir.mkdir()
+
+        if not self.metadata.exists():
+            self.metadata.touch()
 
     def __generate_filepath(self) -> Path:
         return self.cache_dir.joinpath(f'{uuid4()}.pickle')
 
     def __read_pickle(self, file: Path):
-        if not file.exists():
+        if not file.exists() or file.stat().st_size == 0:
             return None
 
         with file.open('rb') as fp:
@@ -76,6 +79,14 @@ class FileProvider(Provider):
         action: Callable[[], str],
         expire_in: Optional[timedelta] = None
     ) -> CacheData:
+        if not key:
+            raise ValueError("Key can not be None or empty")
+
+        if expire_in is not None and not isinstance(expire_in, timedelta):
+            raise TypeError(
+                'The argument expire_in must be of type datetime.timedelta'
+            )
+
         metadata = self.__read_pickle(file=self.metadata) or {}
         file: Path = metadata.get(key, None)
 
@@ -91,8 +102,8 @@ class FileProvider(Provider):
         if not file.exists() or not file.is_file():
             return regenerate_value()
 
-        data: dict = self.__read_pickle(file=file)  # type:ignore
-        value = data.get('value', False)
+        data = self.__read_pickle(file=file) or {}
+        value = data.get('value', None)
         valid = data.get('valid', False)
         expires = data.get('expires', None)
 
@@ -111,6 +122,14 @@ class FileProvider(Provider):
         value: Any,
         expire_in: Optional[timedelta] = None
     ) -> CacheData:
+        if not key:
+            raise ValueError("Key can not be None or empty")
+
+        if expire_in is not None and not isinstance(expire_in, timedelta):
+            raise TypeError(
+                'The argument expire_in must be of type datetime.timedelta'
+            )
+
         metadata = self.__read_pickle(file=self.metadata) or {}
 
         file = metadata.get(key, self.__generate_filepath())
@@ -122,7 +141,7 @@ class FileProvider(Provider):
             'expires':
                 (datetime.now() + expire_in).timestamp() if expire_in else None
         }
-        metadata[key] = data
+        metadata[key] = file
 
         self.__write_pickle(file, data)
         self.__write_pickle(self.metadata, metadata)
@@ -130,8 +149,24 @@ class FileProvider(Provider):
         return CacheData(value=value, valid=True)
 
     def set_validate(self, key: str, valid: bool, silent: bool = True) -> None:
+        if not key:
+            raise ValueError("Key can not be None or empty")
+
         metadata = self.__read_pickle(file=self.metadata) or {}
 
         file = metadata.get(key, None)
-        if file is None and silent is False:
-            raise ValueError("There's no cache with the provided key.")
+        if file is None:
+            if silent is False:
+                raise ValueError("There's no cache with the provided key.")
+            return None
+
+        data = self.__read_pickle(file) or {}
+        if len(data) == 0:
+            if silent is False:
+                raise ValueError(
+                    "The file with the provided key has no value to update"
+                )
+            return None
+
+        data['valid'] = valid
+        self.__write_pickle(file, data)
