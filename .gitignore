@@ -3,6 +3,7 @@
 
 config.py
 build-and-upload.bat
+make-changelog.bat
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
