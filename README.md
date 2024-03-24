@@ -3,7 +3,30 @@
 [![PyPI version](https://badge.fury.io/py/mgdl-simple-cache.svg)](https://badge.fury.io/py/mgdl-simple-cache)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-Simple Cache is a lightweight cache manager designed to simplify caching operations using Deta Base. It offers a convenient way to store and retrieve cached data efficiently in Python applications.
+Simple Cache is a lightweight caching manager crafted to streamline caching operations using various providers. It provides a convenient solution for storing and efficiently retrieving cached data within Python applications. It's highly extensible, allowing you to enhance its functionality with custom providers tailored to your specific use cases. Additionally, creating a new provider is straightforward and seamless.
+
+## Table of Contents
+
+-   [Installation](#installation)
+-   [Purpose](#purpose)
+-   [Available Providers](#available-providers)
+-   [Usage](#usage)
+    -   [Get Data](#get-data)
+    -   [Set Data](#set-data)
+    -   [Set Data Validation](#set-data-validation)
+-   [Documentation](#documentation)
+    -   [SimpleCache](#simplecache)
+    -   [Decorator `attach`](#decorator-attach)
+        -   [How to Use](#how-to-use)
+        -   [Decorator Documentation](#decorator-documentation)
+    -   [Providers](#providers)
+        -   [Provider (ABC)](#provider-abc)
+        -   [DetaProvider](#detaprovider)
+        -   [FileProvider](#fileprovider)
+-   [Testing](#testing)
+    -   [Coverage](#coverage)
+-   [License](#license)
+-   [Contribution](#contribution)
 
 ## Installation
 
@@ -15,7 +38,13 @@ pip install mgdl-simple-cache
 
 ## Purpose
 
-In today's data-driven applications, caching plays a crucial role in enhancing performance by reducing the need to repeatedly fetch data from external sources. Simple Cache aims to streamline this process by providing a user-friendly interface for managing cached data, backed by Deta Base, a fast and scalable database service.
+In modern data-driven applications, caching plays a pivotal role in boosting performance by minimizing the necessity to frequently retrieve data from external sources. Simple Cache endeavors to simplify this procedure by offering a user-friendly interface for effectively managing cached data.
+
+## Available Providers
+
+-   **[DetaProvider](#detaprovider)**: Use [Deta Base](https://deta.space/docs/en/build/reference/deta-base/) service to manage the cache.
+
+-   **[FileProvider](#fileprovider)**: Manage the cache in the file system using Python's pickle objects.
 
 ## Usage
 
@@ -41,7 +70,21 @@ from simple_cache import SimpleCache
 cache = SimpleCache(provider)
 ```
 
-5. **Usage**:
+It's possible to initialize the Provider with no arguments and initialize the Provider later using the SimpleCache instance:
+
+```python
+from simple_cache import SimpleCache
+from simple_cache.providers import FileProvider
+
+provider = FileProvider()
+cache = SimpleCache(provider=provider)
+
+...
+
+cache.init(cache_dir=Path('path/to/directory')) # This will set the cache directory in FileProvider
+```
+
+4. **Usage**:
 
     - **Get Data**: To retrieve data from the cache, use the `get` method. If the data is not found in the cache or has expired, you can provide a callback function to generate the data and set it in the cache:
 
@@ -91,7 +134,7 @@ provider = DetaProvider(deta_key="your_deta_project_key", table_name="cache_tabl
 cache = SimpleCache(provider)
 
 # Define a function that you want to cache
-@cache.attach(key="my_function_result", expire_in=timedelta(minutes=5))
+@cache.attach(key="my_function_result", expire_in=timedelta(minutes=5)) # The expire_in argument is optional
 def my_function():
     # Simulate an operation that is time or resource-intensive
     result = "Result of the function"
@@ -102,11 +145,14 @@ print(my_function())
 
 # Subsequent calls within the expiration time will use the cached result
 print(my_function())
+
+# To invalidate the cache just use the set_validate function
+cache.set_validate(key="my_function_result", valid=False)
 ```
 
 In this example, the function `my_function` is decorated with `@cache.attach`, which means that its result will be stored in the cache with the key `"my_function_result"` and will expire after 5 minutes. On the first call to the function, the result is calculated and stored in the cache. On subsequent calls within the expiration time, the cached result is returned, avoiding the need to recalculate the result.
 
-#### Documentation
+#### Decorator Documentation
 
 -   `attach(self, key: str, expire_in: Optional[timedelta] = None)`: Decorator to store the result of a function in the cache.
     -   `key (str)`: The unique key for the cache.
@@ -123,17 +169,27 @@ The `Provider` class is an abstract base class defining the interface for cache 
 -   `init(self, **kwargs)`: Initialize the provider with the given parameters. This method should be implemented by subclasses.
 -   `get(self, key: str, action: Callable[[], str], expire_in: Optional[timedelta] = None) -> CacheData`: Retrieve data from the cache with the specified key. If the data is not found or has expired, the provided action function is executed to generate the data.
 -   `set(self, key: str, value: Any, expire_in: Optional[timedelta] = None) -> CacheData`: Set data in the cache with the specified key and value. Optionally, you can specify an expiration time for the data.
--   `set_validate(self, key: str, valid: bool, silent: bool = True) -> None`: Mark data in the cache as valid or invalid.
+-   `set_validate(self, key: str, valid: bool, silent: bool = True)
 
 #### DetaProvider
 
-The `DetaProvider` class is a concrete implementation of the `Provider` interface that stores cache data in Deta databases. It includes methods to initialize the provider, retrieve data from the cache, set data in the cache, and mark data as valid or invalid.
+The `DetaProvider` class is a concrete implementation of the `Provider` interface that stores cache data in Deta Base. It includes methods to initialize the provider, retrieve data from the cache, set data in the cache, and mark data as valid or invalid.
 
 -   `__init__(self, deta_key: Optional[str] = None, table_name: Optional[str] = None)`: Initialize the Deta provider with the specified Deta project key and table name.
 -   `init(self, **kwargs) -> None`: Initialize the Deta provider with the given parameters. If no table name is provided, a default table name is used.
 -   `get(self, key: str, action: Callable[[], str], expire_in: Optional[timedelta] = None) -> CacheData`: Retrieve data from the Deta cache with the specified key. If the data is not found or has expired, the provided action function is executed to generate the data.
 -   `set(self, key: str, value: Any, expire_in: Optional[timedelta] = None) -> CacheData`: Set data in the Deta cache with the specified key and value. Optionally, you can specify an expiration time for the data.
 -   `set_validate(self, key: str, valid: bool, silent: bool = True) -> None`: Mark data in the Deta cache as valid or invalid.
+
+#### FileProvider
+
+The `FileProvider` class is a concrete implementation of the `Provider` interface that stores cache data in files on the local file system using Python's pickle system. It includes methods to initialize the provider, retrieve data from the cache, set data in the cache, and mark data as valid or invalid.
+
+-   `__init__(self, cache_dir: Optional[PathLike] = None)`: Initializes the FileProvider with the specified cache directory.
+-   `init(self, **kwargs) -> None`: Initializes the FileProvider with the given parameters. The parameters are the same from the constructor.
+-   `get(self, key: str, action: Callable[[], str], expire_in: Optional[timedelta] = None) -> CacheData`: Retrieves data from the file-based cache with the specified key. If the data is not found or has expired, the provided action function is executed to generate the data.
+-   `set(self, key: str, value: Any, expire_in: Optional[timedelta] = None) -> CacheData`: Sets data in the file-based cache with the specified key and value. Optionally, you can specify an expiration time for the data.
+-   `set_validate(self, key: str, valid: bool, silent: bool = True) -> None`: Marks data in the file-based cache as valid or invalid.
 
 ## Testing
 
