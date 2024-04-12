@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Optional
 from deta import Deta, _Base
 from simple_cache.cache_data import CacheData
@@ -164,7 +164,7 @@ class DetaProvider(Provider):
         data = {
             "value": value,
             "valid": True,
-            "created_at": datetime.now(UTC).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
         }
 
         if expire_in:
