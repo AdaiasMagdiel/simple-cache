@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.2.1] - 2024-04-12
+
+### Added
+
+- Nothing new in this version.
+
+### Changed
+
+- Updated the project version from 1.2.0 to 1.2.1 in the `__init__.py` file.
+- Modified the `SimpleCache` class in `__init__.py` to accept only a valid `Provider`.
+- Changed the `init` method of the `FileProvider` class to have a return type of `None`.
+- Updated the `Provider` abstract class in `provider.py` to include a return type of `None` for the `init` method.
+
+### Removed
+
+- Removed redundant code related to the initialization of the `FileProvider`.
+- Deleted unnecessary comments and unused imports in the codebase.
+- Eliminated redundant code in test files.
+
+[v1.2.1]: https://github.com/AdaiasMagdiel/simple-cache/compare/v1.2.0...v1.2.1
+
 ## [v1.2.0] - 2024-03-23
 
 ### Added
